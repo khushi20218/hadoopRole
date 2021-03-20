@@ -1,0 +1,34 @@
+---
+# tasks file for hadoopLVM
+
+- name: editing core-site.xml
+  template:
+          src: core-site.xml
+          dest: /etc/hadoop/core-site.xml
+
+- name: MASTER editing hdfs-site.xml
+  template:
+          src: hdfs_master.xml
+          dest: /etc/hadoop/hdfs-site.xml
+  when: inventory_hostname in groups['master']
+
+
+- name: SLAVE editing hdfs-site.xml
+  template:
+          src: hdfs_slave.xml
+          dest: /etc/hadoop/hdfs-site.xml
+  when: inventory_hostname in groups['slave']
+
+- name: formatting namenode
+  shell: echo "Y" | hadoop namenode -format
+  when: inventory_hostname in groups['master']
+
+- name: starting namenode
+  command: hadoop-daemon.sh start namenode
+  when: inventory_hostname in groups['master']
+
+- name: starting datanode
+  command: hadoop-daemon.sh start datanode
+  when: inventory_hostname in groups['slave']
+
+
